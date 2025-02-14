@@ -1,0 +1,81 @@
+How to Set an App to Run Only on a Specific SDK (Android) or iOS Version Before Downloading
+When you publish an app to Google Play Store (Android) or Apple App Store (iOS), you can restrict which devices can download it based on their OS version.
+
+1. Set Minimum & Target SDK Version (Android) in build.gradle
+Before uploading to Google Play Store, set the minimum and target Android version in your app’s build.gradle file.
+
+✅ Modify android/app/build.gradle
+gradle
+
+android {
+    compileSdk 34 // Latest Android SDK version
+
+    defaultConfig {
+        applicationId "com.example.myapp"
+        minSdk 26    // Minimum supported Android version (Android 8.0)
+        targetSdk 34 // Target Android version (Latest stable version)
+    }
+}
+🔹 Explanation
+compileSdk 34 → The latest SDK the app is compiled with (usually the newest Android version).
+minSdk 26 → Minimum version required to install the app (Android 8.0 / Oreo).
+targetSdk 34 → The Android version the app is optimized for.
+✅ Google Play will automatically prevent older Android devices from downloading the app.
+
+2. Restrict iOS Version in Info.plist
+For iOS apps, you need to set the minimum iOS version in your Info.plist file.
+
+✅ Modify ios/Runner/Info.plist
+xml
+
+<key>MinimumOSVersion</key>
+<string>14.0</string>
+🔹 Explanation
+<key>MinimumOSVersion</key> → This sets the minimum iOS version required to install the app.
+<string>14.0</string> → The app will not be available for devices running iOS 13 or lower.
+✅ Apple App Store will block users with older iOS versions from downloading your app.
+
+3. Check & Restrict OS Version in Flutter (Cross-Platform)
+If you are building a Flutter app and want to block older OS versions manually, check the platform before launching the app.
+
+✅ Modify main.dart
+dart
+
+import 'dart:io';
+
+void main() {
+  if (Platform.isAndroid) {
+    print("Running on Android 📱");
+    if (androidVersion() < 26) {
+      print("This app requires Android 8.0 (API 26) or higher ❌");
+      return;
+    }
+  } else if (Platform.isIOS) {
+    print("Running on iOS 🍏");
+    if (iosVersion() < 14.0) {
+      print("This app requires iOS 14.0 or higher ❌");
+      return;
+    }
+  }
+
+  runApp(MyApp()); // Start the app only if the OS is supported
+}
+
+int androidVersion() {
+  return int.parse(Platform.operatingSystemVersion.split(' ')[0]);
+}
+
+double iosVersion() {
+  return double.parse(Platform.operatingSystemVersion.split(' ')[0]);
+}
+🔹 Explanation
+Detects if the app is running on Android or iOS.
+Blocks the app from running if the OS version is too old.
+Prevents crashes by ensuring only supported devices can run the app.
+✅ This is useful for debugging, but the App Store and Play Store will already block unsupported devices.
+
+Final 
+Platform	How to Restrict OS Version
+Android (Kotlin/Java)	Set minSdk in build.gradle
+iOS (Swift/Objective-C)	Set MinimumOSVersion in Info.plist
+Flutter (Cross-Platform)	Use Platform.isAndroid / Platform.isIOS to check before launching the app
